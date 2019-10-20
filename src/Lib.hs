@@ -1,6 +1,8 @@
 module Lib
     ( someFunc
     , countValues
+    , createNodes
+    , createTree
     ) where
 
 import Data.List (group, sort, sortOn, sortBy)
