@@ -5,6 +5,7 @@ module Lib
     ) where
 
 import Data.List (group, sort)
+import Data.Map (Map, fromList, lookup)
 
 
 data HuffmanTree = Node {character :: Char, weight :: Int} | Branch {left :: HuffmanTree, right :: HuffmanTree, weight :: Int} deriving (Show, Eq)
@@ -30,4 +31,15 @@ encodeTree :: HuffmanTree -> [Int] -> [(Char, [Int])]
 encodeTree (Node c _) x = [(c, reverse x)]
 encodeTree (Branch l r _) x = encodeTree l (0:x) ++ encodeTree r (1:x)
 
-test x = createTree $ createNodes $ countValues x
+tupleToMap :: [(Char, [Int])] -> Map Char [Int]
+tupleToMap = fromList
+
+encodeString :: String  -> Map Char [Int] -> [Maybe [Int]]
+encodeString [] _ = []
+encodeString (x:xs) m = Data.Map.lookup x m : encodeString xs m
+
+treeString x = createTree $ createNodes $ countValues x
+
+codeString x = encodeTree (treeString x) []
+
+codeMap x = tupleToMap $ codeString x
