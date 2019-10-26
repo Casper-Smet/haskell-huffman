@@ -1,10 +1,10 @@
 name:                huffman
 version:             0.1.0.0
-github:              "githubuser/huffman"
+github:              "Casper-Smet/haskell-huffman"
 license:             BSD3
-author:              "Author name here"
-maintainer:          "example@example.com"
-copyright:           "2019 Author name here"
+author:              "Casper Smet"
+maintainer:          "casper.smet@student.hu.nl"
+copyright:           "2019 Casper Smet"
 
 extra-source-files:
 - README.md
