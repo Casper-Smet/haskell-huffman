@@ -2,15 +2,18 @@ module Lib
     ( countValues
     , createNodes
     , createTree
+    , encodeTree
+    , encodeString
+    , decodeList
+    , tupleToMap
     ) where
 
 import Data.List (group, sort)
-import Data.Map (Map, fromList, lookup, (!))
+import Data.Map (Map, fromList, lookup, (!), member)
 import Control.Monad (join)
 
 
 data HuffmanTree = Node {character :: Char, weight :: Int} | Branch {left :: HuffmanTree, right :: HuffmanTree, weight :: Int} deriving (Show, Eq)
--- newtype CodeList a = [Maybe [a]]
 
 instance Ord HuffmanTree where
     compare x y = compare (weight x) (weight y)
@@ -33,12 +36,20 @@ encodeTree :: HuffmanTree -> [Int] -> [(Char, [Int])]
 encodeTree (Node c _) x = [(c, reverse x)]
 encodeTree (Branch l r _) x = encodeTree l (0:x) ++ encodeTree r (1:x)
 
+-- TODO: Add pattern matching for Data.Map
 tupleToMap :: [(Char, [Int])] -> Map Char [Int]
 tupleToMap = fromList
 
 encodeString :: String  -> Map Char [Int] -> [Int]
 encodeString [] _ = []
-encodeString (x:xs) m = m ! x ++ encodeString' xs m
+encodeString (x:xs) m = m ! x ++ encodeString xs m
+
+decodeList :: [Int] -> [Int] -> Map [Int] Char -> String
+decodeList [] [] _ = []
+decodeList xs [] m = m ! xs : decodeList [] [] m
+decodeList xs xss m 
+    | xs `member` m = (m ! xs) : decodeList [] xss m 
+    | otherwise     = decodeList (xs ++ [head xss]) (tail xss) m
 
 
 treeString x = createTree $ createNodes $ countValues x
@@ -46,3 +57,6 @@ treeString x = createTree $ createNodes $ countValues x
 codeString x = encodeTree (treeString x) []
 
 codeMap x = tupleToMap $ codeString x
+
+-- Encoding:
+-- countValues (String) -> createNodes -> createTree -> encodeTree -> encodeString
