@@ -22,8 +22,12 @@ createNodes xs = sort [uncurry Node x | x <- xs]
 mergeNodes t1 t2 = Branch t1 t2 $ weight t1 + weight t2
 
 createTree :: [HuffmanTree] -> HuffmanTree
+-- TODO: Exhaustive pattern
 createTree [t1, t2] = mergeNodes t1 t2
 createTree (t1:t2:ts) = createTree $ sort $ mergeNodes t1 t2 : ts
 
-test x = createTree $ createNodes $ countValues x
+encodeTree :: HuffmanTree -> [Int] -> [(Char, [Int])]
+encodeTree (Node c _) x = [(c, reverse x)]
+encodeTree (Branch l r _) x = encodeTree l (0:x) ++ encodeTree r (1:x)
 
+test x = createTree $ createNodes $ countValues x
