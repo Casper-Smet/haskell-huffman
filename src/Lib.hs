@@ -5,10 +5,12 @@ module Lib
     ) where
 
 import Data.List (group, sort)
-import Data.Map (Map, fromList, lookup)
+import Data.Map (Map, fromList, lookup, (!))
+import Control.Monad (join)
 
 
 data HuffmanTree = Node {character :: Char, weight :: Int} | Branch {left :: HuffmanTree, right :: HuffmanTree, weight :: Int} deriving (Show, Eq)
+-- newtype CodeList a = [Maybe [a]]
 
 instance Ord HuffmanTree where
     compare x y = compare (weight x) (weight y)
@@ -34,9 +36,10 @@ encodeTree (Branch l r _) x = encodeTree l (0:x) ++ encodeTree r (1:x)
 tupleToMap :: [(Char, [Int])] -> Map Char [Int]
 tupleToMap = fromList
 
-encodeString :: String  -> Map Char [Int] -> [Maybe [Int]]
+encodeString :: String  -> Map Char [Int] -> [Int]
 encodeString [] _ = []
-encodeString (x:xs) m = Data.Map.lookup x m : encodeString xs m
+encodeString (x:xs) m = m ! x ++ encodeString' xs m
+
 
 treeString x = createTree $ createNodes $ countValues x
 
