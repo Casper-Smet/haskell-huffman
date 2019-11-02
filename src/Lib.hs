@@ -6,6 +6,7 @@ module Lib
     , encodeString
     , decodeList
     , tupleToMap
+    , codedString
     ) where
 
 import Data.List (group, sort)
@@ -44,18 +45,18 @@ mergeNodes t1 t2 = Branch t1 t2 $ weight t1 + weight t2
 -- | It merges the two HuffmanTree with the lowest Weight, adds them to the list of HuffmanTrees and repeats until only one tree is left
 createTree  :: [HuffmanTree]    -- ^ List of HuffmanTrees
             -> HuffmanTree      -- ^ Resulting HuffmanTree
--- TODO: Exhaustive pattern
-createTree [t1, t2] = mergeNodes t1 t2
-createTree (t1:t2:ts) = createTree $ sort $ mergeNodes t1 t2 : ts
+createTree []           = error "createTree; Supplied empty list"
+createTree [t]          = t 
+createTree [t1, t2]     = mergeNodes t1 t2
+createTree (t1:t2:ts)   = createTree $ sort $ mergeNodes t1 t2 : ts
 
--- | The 'encodeTree' function traverses (Depth First) a HuffmanTree. It then creates a code for each Node (or Leaf)
--- | Each time it goes left, it adds 0 to the path, every time it goes right it adds 1 to the path. 
--- | When it reaches a Node, it returns a tuple containing the character and the path (the path needs to be reversed to be traversable in decoding).
 encodeTree  :: HuffmanTree      -- ^ Completed HuffmanTree
-            -> [Int]            -- ^ Path
             -> [(Char, [Int])]  -- ^ List of tuples containing character and path (binary code)
-encodeTree (Node c _) x = [(c, reverse x)]
-encodeTree (Branch l r _) x = encodeTree l (0:x) ++ encodeTree r (1:x)
+encodeTree t = encodeTree' t []
+    where 
+        encodeTree' (Node c _) x = [(c, reverse x)]
+        encodeTree' (Branch l r _) x = encodeTree' l (0:x) ++ encodeTree' r (1:x)
+    
 
 -- TODO: Add pattern matching for Data.Map
 -- | The 'tupleToMap' function is a wrapper for Data.Map.fromList. This is necessary for encoding the original text. 
@@ -74,22 +75,25 @@ encodeString (x:xs) m = m ! x ++ encodeString xs m
 -- | Checks if xs is a member of m. 
 -- | If it is a member, it grabs that values calls itself again with an empty xs and xss as it is.
 -- | If it isn't a member of m, it calls itself where xs = xs and the first value of xss, and xss is the tail of xss
-decodeList  :: [Int]                -- ^ xs. This value is used as a key
-            -> [Int]                -- ^ xss. Remainder of the text after head is removed for xs.
+decodeList  :: [Int]                -- ^ xss. Remainder of the text after head is removed for xs.
             -> Map [Int] Char       -- ^ Map (AKA dictionary) where key is a binary code, and value is a unique character
             -> String               -- ^ Huffman decoded Text
-decodeList [] [] _ = []
-decodeList xs [] m = m ! xs : decodeList [] [] m
-decodeList xs xss m 
-    | xs `member` m = (m ! xs) : decodeList [] xss m 
-    | otherwise     = decodeList (xs ++ [head xss]) (tail xss) m
+decodeList = decodeList' []
+    where
+        decodeList' [] [] _ = []
+        decodeList' xs [] m = m ! xs : decodeList' [] [] m
+        decodeList' xs xss m 
+            | xs `member` m = (m ! xs) : decodeList' [] xss m 
+            | otherwise     = decodeList' (xs ++ [head xss]) (tail xss) m
 
 
+-- TODO: eta-reduction
 treeString x = createTree $ createNodes $ countValues x
 
-codeString x = encodeTree (treeString x) []
+codeString x = encodeTree (treeString x)
 
-codeMap x = tupleToMap $ codeString x
+codeMap' x = tupleToMap $ codeString x
 
+codedString x = encodeString x $ tupleToMap $ encodeTree $ createTree $ createNodes $ countValues x 
 -- Encoding:
 -- countValues (String) -> createNodes -> createTree -> encodeTree -> encodeString
