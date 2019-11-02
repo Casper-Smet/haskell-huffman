@@ -58,7 +58,6 @@ encodeTree t = encodeTree' t []
         encodeTree' (Branch l r _) x = encodeTree' l (0:x) ++ encodeTree' r (1:x)
     
 
--- TODO: Add pattern matching for Data.Map
 -- | The 'tupleToMap' function is a wrapper for Data.Map.fromList. This is necessary for encoding the original text. 
 tupleToMap  :: [(Char, [Int])] -- ^ List of tuples containing character and binary code
             -> Map Char [Int]  -- ^ Map (AKA dictionary) where key is unique character, and value binary code
@@ -87,12 +86,6 @@ decodeList = decodeList' []
             | otherwise     = decodeList' (xs ++ [head xss]) (tail xss) m
 
 
--- TODO: eta-reduction
-treeString x = createTree $ createNodes $ countValues x
-
-codeString x = encodeTree (treeString x)
-
-codeMap' x = tupleToMap $ codeString x
 
 codedString x = encodeString x $ tupleToMap $ encodeTree $ createTree $ createNodes $ countValues x 
 -- Encoding:
