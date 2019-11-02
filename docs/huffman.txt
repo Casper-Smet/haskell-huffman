@@ -22,14 +22,7 @@ createNodes :: [(Char, Int)] -> [HuffmanTree]
 --   lowest Weight, adds them to the list of HuffmanTrees and repeats until
 --   only one tree is left
 createTree :: [HuffmanTree] -> HuffmanTree
-
--- | The <a>encodeTree</a> function traverses (Depth First) a HuffmanTree.
---   It then creates a code for each Node (or Leaf) | Each time it goes
---   left, it adds 0 to the path, every time it goes right it adds 1 to the
---   path. | When it reaches a Node, it returns a tuple containing the
---   character and the path (the path needs to be reversed to be
---   traversable in decoding).
-encodeTree :: HuffmanTree -> [Int] -> [(Char, [Int])]
+encodeTree :: HuffmanTree -> [(Char, [Int])]
 
 -- | The <a>encodeString</a> function completes Huffman Encoding on text
 --   using a Map (see <a>encodeTree</a> and subsequently <a>tupleToMap</a>)
@@ -40,11 +33,12 @@ encodeString :: String -> Map Char [Int] -> [Int]
 --   is a member, it grabs that values calls itself again with an empty xs
 --   and xss as it is. | If it isn't a member of m, it calls itself where
 --   xs = xs and the first value of xss, and xss is the tail of xss
-decodeList :: [Int] -> [Int] -> Map [Int] Char -> String
+decodeList :: [Int] -> Map [Int] Char -> String
 
 -- | The <a>tupleToMap</a> function is a wrapper for Data.Map.fromList.
 --   This is necessary for encoding the original text.
 tupleToMap :: [(Char, [Int])] -> Map Char [Int]
+codedString :: String -> [Int]
 instance GHC.Classes.Eq Lib.HuffmanTree
 instance GHC.Show.Show Lib.HuffmanTree
 instance GHC.Classes.Ord Lib.HuffmanTree
