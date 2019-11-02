@@ -96,7 +96,6 @@ encodeFile = do
     putStrLn "Writing code to File..."
     writeFile ("code" ++ location) $ concat $ show <$> code
 
-    print $ readCodeString $ formatCodes $ reshapeCodes codeTuple
 
 
 
