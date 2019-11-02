@@ -1,10 +1,11 @@
 module Main where
 
 import Lib
+import Data.List.Split              (splitOn)
 import System.IO
-import Control.Monad.Trans       (lift)
-import Control.Monad.Trans.State (StateT, runStateT, evalStateT, modify, get, put)
-import Data.Map (Map, empty, fromList, lookup, (!), member, insert)
+import Control.Monad.Trans          (lift)
+import Control.Monad.Trans.State    (StateT, runStateT, evalStateT, modify, get, put)
+import Data.Map                     (Map, empty, fromList, lookup, (!), member, insert)
 
 type DecodeMonad = StateT (Map [Int] Char, DecodeState) IO
 type DecodeFileMonad = StateT (Map [Int] Char, String) IO
@@ -23,6 +24,30 @@ addKey (xs, c) (m, s) = (insert xs c m, s)
 
 getMap :: (Map [Int] Char, DecodeState) -> Map [Int] Char
 getMap (m, _) = m
+
+-- TODO: Move functions to a new file in /src/
+-- TODO: Add comments
+keyFromString :: String -> [Int]
+keyFromString key = [read [k] :: Int | k <- key]
+
+reshapeCodes :: [(Char, [Int])] -> [(Char, String)]
+reshapeCodes xs = [(fst x, concat $ show <$> snd x) | x <- xs]
+
+formatCodes :: [(Char, String)] -> String
+formatCodes []            = []
+formatCodes [(c, i)]      = c : ';' : i
+formatCodes ((c, i):xs)   = c : ';' : i ++ ',' : formatCodes xs
+
+listifyCodes :: String -> [[String]]
+listifyCodes xs = [splitOn ";" x | x <- splitOn "," xs]
+
+readCodes :: [[String]] -> [([Int], Char)]
+readCodes xss = [readCode xs | xs <- xss]
+
+readCode [c, i] = (keyFromString i, head c)
+readCode _ = error "readCodes; Bad Huffman codes"
+
+readCodeString x = readCodes $ listifyCodes x 
 
 
 encode :: IO ()
@@ -49,7 +74,8 @@ encode = do
 
     print codedInput
  
-
+-- FIXME: error out when file does not exist
+-- TODO: Clean up
 encodeFile :: IO ()
 encodeFile = do
     putStrLn "Location of text file"
@@ -57,18 +83,20 @@ encodeFile = do
     -- Read contents of file
     contents <- readFile location
     -- Turn contents into Map (dictionary) and Huffman Code
-    putStrLn "Encoding text"
+    putStrLn "Encoding text..."
     let codeTuple = encodeTree $ createTree $ createNodes $ countValues contents
     let code = encodeString contents $ tupleToMap codeTuple  
 
 
     -- Write Map to file
-    putStrLn "Writing Map to File"
-    writeFile ("map" ++ location) $ show codeTuple
+    putStrLn "Writing Map to File..."
+    writeFile ("map" ++ location) $ formatCodes $ reshapeCodes codeTuple
 
     -- Write String to file
-    putStrLn "Writing code to File"
+    putStrLn "Writing code to File..."
     writeFile ("code" ++ location) $ concat $ show <$> code
+
+    print $ readCodeString $ formatCodes $ reshapeCodes codeTuple
 
 
 
@@ -85,7 +113,7 @@ decode = do
                         key <- lift getLine
                         if all (`elem` "01") key && length value == 1
                             then do
-                                let intKey = [read [k] :: Int | k <- key]
+                                let intKey = keyFromString key
                                 let charValue = head value
                                 modify (addKey (intKey, charValue))
                                 decode
@@ -97,18 +125,39 @@ decode = do
                         lift $ print $ getMap state
                         lift $ putStrLn "Enter encoded word"
                         word <- lift getLine
-                        let list = [read [x] :: Int | x <- word]
+                        let list = keyFromString word
                         let map = getMap state 
                         let decodedWord = decodeList list map
                         lift $ putStrLn decodedWord
 
+                        
+-- FIXME: Error out when file does not exist
+-- TODO: Clean up
 decodeFile :: IO ()
 decodeFile = do
     putStrLn "Relative path to codemap:"
     codeMapLocation <- getLine
-    putStrLn "Relative path to code"
+    stringMap <- readFile codeMapLocation
+    putStrLn stringMap
+
+    putStrLn "Relative path to code:"
     codeLocation <- getLine
-    putStrLn $ codeMapLocation ++ codeLocation
+    stringCode <- readFile codeLocation
+    putStrLn stringCode
+    
+    let wordList = keyFromString stringCode
+    let characterMap = fromList $ readCodeString stringMap
+
+    let decodedText = decodeList wordList characterMap
+
+    putStrLn "Location to Save text (include .txt)"
+    stringLocation <- getLine 
+
+    
+    writeFile stringLocation decodedText
+    
+    
+    
     
 
 main :: IO ()
