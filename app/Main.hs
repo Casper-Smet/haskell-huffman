@@ -1,12 +1,16 @@
 module Main where
 
 import Lib
+import System.IO
 import Control.Monad.Trans       (lift)
-import Control.Monad.Trans.State (StateT, runStateT, modify, get, put)
+import Control.Monad.Trans.State (StateT, runStateT, evalStateT, modify, get, put)
 import Data.Map (Map, empty, fromList, lookup, (!), member, insert)
 
 type DecodeMonad = StateT (Map [Int] Char, DecodeState) IO
+type DecodeFileMonad = StateT (Map [Int] Char, String) IO
+
 data DecodeState = Entering | Decoding deriving (Eq)
+
 
 getDecState :: (Map [Int] Char, DecodeState) -> DecodeState
 getDecState (_, s) = s
@@ -35,7 +39,7 @@ encode = do
     let tree = createTree nodes
 
     -- Step 4: encode Huffman Tree
-    let codes = encodeTree tree []
+    let codes = encodeTree tree
 
     -- Step 5: turn tuples into Data.Map
     let codeMap = tupleToMap codes 
@@ -46,6 +50,30 @@ encode = do
     print codedInput
  
 
+encodeFile :: IO ()
+encodeFile = do
+    putStrLn "Location of text file"
+    location <- getLine
+    -- Read contents of file
+    contents <- readFile location
+    -- Turn contents into Map (dictionary) and Huffman Code
+    putStrLn "Encoding text"
+    let codeTuple = encodeTree $ createTree $ createNodes $ countValues contents
+    let code = encodeString contents $ tupleToMap codeTuple  
+
+
+    -- Write Map to file
+    putStrLn "Writing Map to File"
+    writeFile ("map" ++ location) $ show codeTuple
+
+    -- Write String to file
+    putStrLn "Writing code to File"
+    writeFile ("code" ++ location) $ concat $ show <$> code
+
+
+
+-- TODO: Clean up
+-- TODO: add reads "10c" :: [(Integer, String)]
 decode :: DecodeMonad ()
 decode = do   
                 state <- get  
@@ -71,20 +99,26 @@ decode = do
                         word <- lift getLine
                         let list = [read [x] :: Int | x <- word]
                         let map = getMap state 
-                        let decodedWord = decodeList [] list map
+                        let decodedWord = decodeList list map
                         lift $ putStrLn decodedWord
 
+decodeFile :: IO ()
+decodeFile = do
+    putStrLn "Relative path to codemap:"
+    codeMapLocation <- getLine
+    putStrLn "Relative path to code"
+    codeLocation <- getLine
+    putStrLn $ codeMapLocation ++ codeLocation
+    
 
--- FIXME: Add the ability to choose between encode and decode in main
--- main :: IO ()
--- main = do
---     putStrLn "Encode (E) or Decode (D)"
---     input <- getLine
---     if input == "E" then
---         encode       
---     else if input == "D" then
---         runStateT decode empty
---     else
---         main
-
-main = runStateT decode (empty, Entering)
+main :: IO ()
+main = do
+    putStrLn "Encode (E), Decode (D), Encode to file (EF), Decode from file (DF), Quit (ctrl-C)"
+    input <- getLine
+    case input of
+        "E"     -> encode
+        "D"     -> evalStateT decode (empty, Entering)
+        "EF"    -> encodeFile
+        "DF"    -> decodeFile
+        _       -> putStrLn "Bad input"
+    main
