@@ -12,6 +12,9 @@ type DecodeFileMonad = StateT (Map [Int] Char, String) IO
 
 data DecodeState = Entering | Decoding deriving (Eq)
 
+-- TODO: Move delimiter options to a new file in /src/
+delimiter1 = "||@||"
+delimiter2 = "//#//"
 
 getDecState :: (Map [Int] Char, DecodeState) -> DecodeState
 getDecState (_, s) = s
@@ -33,13 +36,14 @@ keyFromString key = [read [k] :: Int | k <- key]
 reshapeCodes :: [(Char, [Int])] -> [(Char, String)]
 reshapeCodes xs = [(fst x, concat $ show <$> snd x) | x <- xs]
 
+-- FIXME: ++ and [c] are slow, very bad, and not good. Figure out an alternative. Maybe use ':' and reverse?
 formatCodes :: [(Char, String)] -> String
 formatCodes []            = []
-formatCodes [(c, i)]      = c : ';' : i
-formatCodes ((c, i):xs)   = c : ';' : i ++ ',' : formatCodes xs
+formatCodes [(c, i)]      = [c] ++ delimiter1 ++ i
+formatCodes ((c, i):xs)   = [c] ++ delimiter1 ++ i ++ delimiter2 ++ formatCodes xs
 
 listifyCodes :: String -> [[String]]
-listifyCodes xs = [splitOn ";" x | x <- splitOn "," xs]
+listifyCodes xs = [splitOn delimiter1 x | x <- splitOn delimiter2 xs]
 
 readCodes :: [[String]] -> [([Int], Char)]
 readCodes xss = [readCode xs | xs <- xss]
@@ -131,27 +135,24 @@ decode = do
 
                         
 -- FIXME: Error out when file does not exist
+-- TODO: Add check for correct format codemap / code
 -- TODO: Clean up
 decodeFile :: IO ()
 decodeFile = do
     putStrLn "Relative path to codemap:"
     codeMapLocation <- getLine
     stringMap <- readFile codeMapLocation
-    putStrLn stringMap
 
     putStrLn "Relative path to code:"
     codeLocation <- getLine
     stringCode <- readFile codeLocation
-    putStrLn stringCode
-    
+  
     let wordList = keyFromString stringCode
     let characterMap = fromList $ readCodeString stringMap
-
     let decodedText = decodeList wordList characterMap
 
     putStrLn "Location to Save text (include .txt)"
     stringLocation <- getLine 
-
     
     writeFile stringLocation decodedText
     
