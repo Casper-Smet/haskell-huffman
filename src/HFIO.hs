@@ -1,7 +1,7 @@
 {-|
 Module      : HFIO
 Description : Module containing helper functions for encoding and decoding to file
-Copyright   : (c) Casper Smet, 2019
+Copyright   : (c) Casper Smet, 2OI9
 License     : BSD3
 Maintainer  : casper.smet@student.hu.nl
 
@@ -40,22 +40,22 @@ delimiter1 = "||@||"
 -- | Second delimiter used for encoding map \"\//#\//\"
 delimiter2 = "//#//"
 
--- | Takes a string containing \'1\' or \'0\'s, returns list of Binary. 
-keyFromString   :: String       -- ^ String, example: "0101"
-                -> [Binary]        -- ^ List of Binary, example: [0,1,0,1]
+-- | Takes a string containing \'I\' or \'O\'s, returns list of Binary. 
+keyFromString   :: String       -- ^ String, example: "OIOI"
+                -> [Binary]        -- ^ List of Binary, example: [O,I,O,I]
 keyFromString key 
     | all (`elem` "IO") key = [if k == 'I' then I else O | k <- key]
     | otherwise             = error "keyFromString; Bad Huffman key"
 
 -- | Reshapes Huffman Map
-reshapeCodes    :: [(Char, [Binary])]       -- ^ Huffman Map in tuple form, example: [(\'c\', [1,0,1])]
-                -> [(Char, String)]         -- ^ Huffman Map in Tuple form, example: [(\'c\', \"101\")]
+reshapeCodes    :: [(Char, [Binary])]       -- ^ Huffman Map in tuple form, example: [(\'c\', [I,O,I])]
+                -> [(Char, String)]         -- ^ Huffman Map in Tuple form, example: [(\'c\', \"IOI\")]
 reshapeCodes xs = [(fst x, concat $ show <$> snd x) | x <- xs]
 
 
 -- | Takes a list of Huffman Key-Value pairs, turns into String for printing to file. Uses delimiter1 and delimiter2.
-formatCodes     :: [(Char, String)]         -- ^ Huffman Map in tuple form, example: [(\'c\', "101"), (\'d\', "110")]
-                -> String                   -- ^ Stringified Huffman map for printing to file, example: \"c||\@||101\/\/\#\/\/d||\@||110\"
+formatCodes     :: [(Char, String)]         -- ^ Huffman Map in tuple form, example: [(\'c\', "IOI"), (\'d\', "IIO")]
+                -> String                   -- ^ Stringified Huffman map for printing to file, example: \"c||\@||IOI\/\/\#\/\/d||\@||IIO\"
 formatCodes [] = []
 formatCodes xs = concat $ formatCodes' xs
         where
@@ -65,13 +65,13 @@ formatCodes xs = concat $ formatCodes' xs
 
 
 -- | Inverse of 'formatCodes' using lists instead of tuples
-listifyCodes    :: String       -- ^ Stringified Huffman map, example: \"c||\@||101\/\/\#\/\/d||\@||110\"
-                -> [[String]]   -- ^ Two dimensional list containing String-code pairs, example: [[\"c\", \"101\"], [\"d\", \"110\"]] 
+listifyCodes    :: String       -- ^ Stringified Huffman map, example: \"c||\@||IOI\/\/\#\/\/d||\@||IIO\"
+                -> [[String]]   -- ^ Two dimensional list containing String-code pairs, example: [[\"c\", \"IOI\"], [\"d\", \"IIO\"]] 
 listifyCodes xs = [splitOn delimiter1 x | x <- splitOn delimiter2 xs]
 
 -- | Takes two-dimensional list, returns tuple pair (Huffman Map)
-readCodes   :: [[String]]       -- ^ Two dimensional list containg String-code pairs, example [[\"c\", \"101\"], [\"d\", \"110\"]] 
-            -> [([Binary], Char)]  -- ^ Huffman Map in tuple form, example: [([1,0,1], \'c\'), ([1,1,1], \'d\')]
+readCodes   :: [[String]]       -- ^ Two dimensional list containg String-code pairs, example [[\"c\", \"IOI\"], [\"d\", \"IIO\"]] 
+            -> [([Binary], Char)]  -- ^ Huffman Map in tuple form, example: [([I,O,I], \'c\'), ([I,I,I], \'d\')]
 readCodes xss = [readCode xs | xs <- xss]
 
 readCode :: [String] -> ([Binary], Char)
@@ -79,6 +79,6 @@ readCode [c, i] = (keyFromString i, head c)
 readCode _ = error "readCodes; Bad Huffman codes"
 
 -- | Composition of 'readCodes' and 'listifyCodes'
-readCodeString  :: String           -- ^ Stringified Huffman map, example: \"c||\@||101\/\/\#\/\/d||\@||110\"
-                -> [([Binary], Char)]  -- ^ Huffman Map in tuple form, example: [([1,0,1], \'c\'), ([1,1,1], \'d\')]
+readCodeString  :: String           -- ^ Stringified Huffman map, example: \"c||\@||IOI\/\/\#\/\/d||\@||IIO\"
+                -> [([Binary], Char)]  -- ^ Huffman Map in tuple form, example: [([I,O,I], \'c\'), ([I,I,I], \'d\')]
 readCodeString = readCodes . listifyCodes

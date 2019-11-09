@@ -79,7 +79,7 @@ instance GHC.Classes.Ord Lib.HuffmanTree
 --   </ul>
 module HFIO
 
--- | Takes a string containing '1' or '0's, returns list of Binary.
+-- | Takes a string containing 'I' or 'O's, returns list of Binary.
 keyFromString :: String -> [Binary]
 
 -- | Reshapes Huffman Map
