@@ -1,20 +1,18 @@
 module Main where
 
 import Lib
-import Data.List.Split              (splitOn)
+import HFIO
+
 import System.IO
 import Control.Monad.Trans          (lift)
-import Control.Monad.Trans.State    (StateT, runStateT, evalStateT, modify, get, put)
-import Data.Map                     (Map, empty, fromList, lookup, (!), member, insert)
+import Control.Monad.Trans.State    (StateT, evalStateT, modify, get)
+import Data.Map                     (Map, empty, fromList, insert)
 
 type DecodeMonad = StateT (Map [Int] Char, DecodeState) IO
 type DecodeFileMonad = StateT (Map [Int] Char, String) IO
 
 data DecodeState = Entering | Decoding deriving (Eq)
 
--- TODO: Move delimiter options to a new file in /src/
-delimiter1 = "||@||"
-delimiter2 = "//#//"
 
 getDecState :: (Map [Int] Char, DecodeState) -> DecodeState
 getDecState (_, s) = s
@@ -27,32 +25,6 @@ addKey (xs, c) (m, s) = (insert xs c m, s)
 
 getMap :: (Map [Int] Char, DecodeState) -> Map [Int] Char
 getMap (m, _) = m
-
--- TODO: Move functions to a new file in /src/
--- TODO: Add comments
-keyFromString :: String -> [Int]
-keyFromString key = [read [k] :: Int | k <- key]
-
-reshapeCodes :: [(Char, [Int])] -> [(Char, String)]
-reshapeCodes xs = [(fst x, concat $ show <$> snd x) | x <- xs]
-
--- FIXME: ++ and [c] are slow, very bad, and not good. Figure out an alternative. Maybe use ':' and reverse?
-formatCodes :: [(Char, String)] -> String
-formatCodes []            = []
-formatCodes [(c, i)]      = [c] ++ delimiter1 ++ i
-formatCodes ((c, i):xs)   = [c] ++ delimiter1 ++ i ++ delimiter2 ++ formatCodes xs
-
-listifyCodes :: String -> [[String]]
-listifyCodes xs = [splitOn delimiter1 x | x <- splitOn delimiter2 xs]
-
-readCodes :: [[String]] -> [([Int], Char)]
-readCodes xss = [readCode xs | xs <- xss]
-
-readCode [c, i] = (keyFromString i, head c)
-readCode _ = error "readCodes; Bad Huffman codes"
-
-readCodeString x = readCodes $ listifyCodes x 
-
 
 encode :: IO ()
 encode = do
