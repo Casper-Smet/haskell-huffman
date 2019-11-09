@@ -9,7 +9,6 @@ import Control.Monad.Trans.State    (StateT, evalStateT, modify, get)
 import Data.Map                     (Map, empty, fromList, insert)
 
 type DecodeMonad = StateT (Map [Int] Char, DecodeState) IO
-type DecodeFileMonad = StateT (Map [Int] Char, String) IO
 
 data DecodeState = Entering | Decoding deriving (Eq)
 
@@ -118,7 +117,7 @@ decodeFile = do
     putStrLn "Relative path to code:"
     codeLocation <- getLine
     stringCode <- readFile codeLocation
-  
+    
     let wordList = keyFromString stringCode
     let characterMap = fromList $ readCodeString stringMap
     let decodedText = decodeList wordList characterMap
