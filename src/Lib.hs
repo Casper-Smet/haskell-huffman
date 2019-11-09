@@ -21,8 +21,7 @@ module Lib
     ) where
 
 import Data.List (group, sort)
-import Data.Map (Map, fromList, lookup, (!), member)
-import Control.Monad (join)
+import Data.Map (Map, fromList, (!), member)
 
 -- ##     ## ##     ## ######## ######## ##     ##    ###    ##    ## 
 -- ##     ## ##     ## ##       ##       ###   ###   ## ##   ###   ## 
