@@ -102,7 +102,9 @@ decodeList  :: [Int]                -- ^ xss. Remainder of the text after head i
 decodeList = decodeList' []
     where
         decodeList' [] [] _ = []
-        decodeList' xs [] m = m ! xs : decodeList' [] [] m
+        decodeList' xs [] m 
+            | xs `member` m = m ! xs : decodeList' [] [] m
+            | otherwise     = error "decodeList; Bad Huffman key"
         decodeList' xs xss m 
             | xs `member` m = (m ! xs) : decodeList' [] xss m 
             | otherwise     = decodeList' (xs ++ [head xss]) (tail xss) m
