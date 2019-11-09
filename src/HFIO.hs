@@ -33,8 +33,6 @@ import Data.List.Split              (splitOn)
 --  ##  ##     ## 
 -- ####  ####### 
 
--- -- TODO: Add comments
--- -- TODO: Add check for in '0,1'
 
 -- | First delimiter used for encoding map \"||\@||\"
 delimiter1 = "||@||"
