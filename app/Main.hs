@@ -111,7 +111,7 @@ decode = do
 
                         
 -- FIXME: Error out when file does not exist
--- TODO: Add check for correct format codemap / code
+-- TODO: Add check for correct format codemap
 -- TODO: Clean up
 decodeFile :: IO ()
 decodeFile = do
@@ -122,16 +122,20 @@ decodeFile = do
     putStrLn "Relative path to code:"
     codeLocation <- getLine
     stringCode <- readFile codeLocation
-    
-    let wordList = keyFromString stringCode
-    let characterMap = fromList $ readCodeString stringMap
-    let decodedText = decodeList wordList characterMap
+    if all (`elem` "01") stringCode && all (\x -> length x > 0) [stringCode, stringMap]
+        then do
+            let wordList = keyFromString stringCode
+            let characterMap = fromList $ readCodeString stringMap
+            let decodedText = decodeList wordList characterMap
 
-    putStrLn "Location to Save text (include .txt)"
-    stringLocation <- getLine 
-    
-    writeFile stringLocation decodedText
-    
+            putStrLn "Location to Save text (include .txt)"
+            stringLocation <- getLine 
+            
+            writeFile stringLocation decodedText
+    else do
+        putStrLn "Incorrect filepath or file"
+        decodeFile
+        
     
     
     
