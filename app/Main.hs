@@ -75,7 +75,6 @@ encodeFile = do
 
 
 -- TODO: Clean up
--- TODO: add reads "10c" :: [(Integer, String)]
 decode :: DecodeMonad ()
 decode = do   
                 state <- get  
