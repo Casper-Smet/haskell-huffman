@@ -113,6 +113,8 @@ decodeList = decodeList' []
 
 -- | Returns a Haskell encoded String
 -- Composition of 'encodeString', 'tupleToMap', 'encodeTree', 'createTree', 'createNodes' and 'countValues'
+codedString :: String   -- ^ String for encoding
+            -> [Binary] -- ^ Binary code representing string
 codedString x = encodeString x $ tupleToMap $ encodeTree $ createTree $ createNodes $ countValues x 
 
 -- Encoding:
