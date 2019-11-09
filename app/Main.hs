@@ -4,6 +4,7 @@ import Lib
 import HFIO
 
 import System.IO
+import System.Directory             (doesFileExist)
 import Control.Monad.Trans          (lift)
 import Control.Monad.Trans.State    (StateT, evalStateT, modify, get)
 import Data.Map                     (Map, empty, fromList, insert)
@@ -48,32 +49,37 @@ encode = do
     let codedInput = encodeString input codeMap
 
     print codedInput
- 
--- FIXME: error out when file does not exist
+
 -- TODO: Clean up
 encodeFile :: IO ()
 encodeFile = do
     putStrLn "Location of text file"
     location <- getLine
-    -- Read contents of file
-    contents <- readFile location
-    if length contents > 0
+    exists <- doesFileExist location
+    if exists 
         then do
-        -- Turn contents into Map (dictionary) and Huffman Code
-        putStrLn "Encoding text..."
-        let codeTuple = encodeTree $ createTree $ createNodes $ countValues contents
-        let code = encodeString contents $ tupleToMap codeTuple  
+            -- Read contents of file
+            contents <- readFile location
+            if length contents > 0
+                then do
+                -- Turn contents into Map (dictionary) and Huffman Code
+                putStrLn "Encoding text..."
+                let codeTuple = encodeTree $ createTree $ createNodes $ countValues contents
+                let code = encodeString contents $ tupleToMap codeTuple  
 
 
-        -- Write Map to file
-        putStrLn "Writing Map to File..."
-        writeFile ("map" ++ location) $ formatCodes $ reshapeCodes codeTuple
+                -- Write Map to file
+                putStrLn "Writing Map to File..."
+                writeFile ("map" ++ location) $ formatCodes $ reshapeCodes codeTuple
 
-        -- Write String to file
-        putStrLn "Writing code to File..."
-        writeFile ("code" ++ location) $ concat $ show <$> code
+                -- Write String to file
+                putStrLn "Writing code to File..."
+                writeFile ("code" ++ location) $ concat $ show <$> code
+            else do
+                putStrLn "Empty file"
+                encodeFile
     else do
-        putStrLn "Empty file"
+        putStrLn "File does not exist"
         encodeFile
 
 
@@ -114,7 +120,6 @@ decode = do
                             decode
 
                         
--- FIXME: Error out when file does not exist
 -- TODO: Add check for correct format codemap
 -- TODO: Clean up
 decodeFile :: IO ()
@@ -122,27 +127,35 @@ decodeFile = do
     -- Get path to Map
     putStrLn "Relative path to codemap:"
     codeMapLocation <- getLine
-    stringMap <- readFile codeMapLocation
-
     -- Get path to Code
     putStrLn "Relative path to code:"
     codeLocation <- getLine
-    stringCode <- readFile codeLocation
-    
-    if all (`elem` "IO") stringCode && all (\x -> length x > 0) [stringCode, stringMap]
-        then do
-            let wordList = keyFromString stringCode
-            let characterMap = fromList $ readCodeString stringMap
-            let decodedText = decodeList wordList characterMap
 
-            putStrLn "Location to Save text (include .txt)"
-            stringLocation <- getLine 
+    codeExists <- doesFileExist codeLocation
+    mapExists <- doesFileExist codeMapLocation
+
+    if codeExists && mapExists
+        then do
+            stringMap <- readFile codeMapLocation
+
+            stringCode <- readFile codeLocation
             
-            writeFile stringLocation decodedText
+            if all (`elem` "IO") stringCode && all (\x -> length x > 0) [stringCode, stringMap]
+                then do
+                    let wordList = keyFromString stringCode
+                    let characterMap = fromList $ readCodeString stringMap
+                    let decodedText = decodeList wordList characterMap
+
+                    putStrLn "Location to Save text (include .txt)"
+                    stringLocation <- getLine 
+                    
+                    writeFile stringLocation decodedText
+            else do
+                putStrLn "Incorrect file"
+                decodeFile
     else do
-        putStrLn "Incorrect filepath or file"
+        putStrLn "Incorrect filepath, file does not exist"
         decodeFile
-        
     
     
     

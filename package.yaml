@@ -25,6 +25,7 @@ dependencies:
 - transformers
 - mtl
 - split
+- directory
 
 library:
   source-dirs: src
