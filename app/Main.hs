@@ -99,10 +99,15 @@ decode = do
                         lift $ print $ getMap state
                         lift $ putStrLn "Enter encoded word"
                         word <- lift getLine
-                        let list = keyFromString word
-                        let map = getMap state 
-                        let decodedWord = decodeList list map
-                        lift $ putStrLn decodedWord
+                        if all (`elem` "01") word
+                            then do
+                                let list = keyFromString word
+                                let map = getMap state 
+                                let decodedWord = decodeList list map
+                                lift $ putStrLn decodedWord
+                        else do
+                            lift $ putStrLn "Enter only 1s or 0s" 
+                            decode
 
                         
 -- FIXME: Error out when file does not exist
