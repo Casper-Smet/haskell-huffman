@@ -1,3 +1,14 @@
+{-|
+Module      : Lib
+Description : Module containing all necessary functions to encode and decode a string using Huffman encoding
+Copyright   : (c) Casper Smet, 2019
+License     : BSD3
+Maintainer  : casper.smet@student.hu.nl
+
+This module contains all necessary functions to encode to and decode from Huffman codes. 
+This module was created for the Utrecht University of Applied Sciences AI course 'Declarative Programming'
+
+-}
 module Lib
     ( countValues
     , createNodes
@@ -12,6 +23,14 @@ module Lib
 import Data.List (group, sort)
 import Data.Map (Map, fromList, lookup, (!), member)
 import Control.Monad (join)
+
+-- ##     ## ##     ## ######## ######## ##     ##    ###    ##    ## 
+-- ##     ## ##     ## ##       ##       ###   ###   ## ##   ###   ## 
+-- ##     ## ##     ## ##       ##       #### ####  ##   ##  ####  ## 
+-- ######### ##     ## ######   ######   ## ### ## ##     ## ## ## ## 
+-- ##     ## ##     ## ##       ##       ##     ## ######### ##  #### 
+-- ##     ## ##     ## ##       ##       ##     ## ##     ## ##   ### 
+-- ##     ##  #######  ##       ##       ##     ## ##     ## ##    ## 
 
 
 data HuffmanTree 
@@ -34,7 +53,7 @@ createNodes :: [(Char, Int)]    -- ^ Unique character is text, frequency of char
             -> [HuffmanTree]    -- ^ List of Node
 createNodes xs = sort [uncurry Node x | x <- xs]
 
--- | The 'mergeNodes' function merges two HuffmanTree's into one Branch. 
+-- | The 'mergeNodes' function merges two HuffmanTree\'s into one Branch. 
 -- | The weight of the new Branch being the sum of the weight of it's predecessors.
 mergeNodes  :: HuffmanTree      -- ^ HuffmanTree 1
             -> HuffmanTree      -- ^ HuffmanTree 2
@@ -50,6 +69,9 @@ createTree [t]          = t
 createTree [t1, t2]     = mergeNodes t1 t2
 createTree (t1:t2:ts)   = createTree $ sort $ mergeNodes t1 t2 : ts
 
+-- | The 'encodeTree' function traverses (Depth First) a HuffmanTree. It then creates a code for each Node (or Leaf)
+-- Each time it goes left, it adds 0 to the path, every time it goes right it adds 1 to the path. 
+-- When it reaches a Node, it returns a tuple containing the character and the path (the path needs to be reversed to be traversable in decoding).
 encodeTree  :: HuffmanTree      -- ^ Completed HuffmanTree
             -> [(Char, [Int])]  -- ^ List of tuples containing character and path (binary code)
 encodeTree t = encodeTree' t []
@@ -85,8 +107,9 @@ decodeList = decodeList' []
             | xs `member` m = (m ! xs) : decodeList' [] xss m 
             | otherwise     = decodeList' (xs ++ [head xss]) (tail xss) m
 
-
-
+-- | Returns a Haskell encoded String
+-- Composition of 'encodeString', 'tupleToMap', 'encodeTree', 'createTree', 'createNodes' and 'countValues'
 codedString x = encodeString x $ tupleToMap $ encodeTree $ createTree $ createNodes $ countValues x 
+
 -- Encoding:
 -- countValues (String) -> createNodes -> createTree -> encodeTree -> encodeString

@@ -7,6 +7,44 @@
 @package huffman
 @version 0.1.0.0
 
+
+-- | This module contains helper functions for encoding and decoding to
+--   file. Actual writing to file only happens in the application side of
+--   this library This module was created for the Utrecht University of
+--   Applied Sciences AI course 'Declarative Programming'
+--   
+--   There are a couple of references to 'delimiter1' and 'delimiter2'.
+--   These are defined as follows:
+--   
+--   <ul>
+--   <li>delimiter1 = "||@||"</li>
+--   <li>delimiter2 = "//#//"</li>
+--   </ul>
+module HFIO
+
+-- | Takes a string containing '1' or '0's, returns list of Int.
+keyFromString :: String -> [Int]
+
+-- | Reshapes Huffman Map
+reshapeCodes :: [(Char, [Int])] -> [(Char, String)]
+
+-- | Takes a list of Huffman Key-Value pairs, turns into String for
+--   printing to file. Uses delimiter1 and delimiter2.
+formatCodes :: [(Char, String)] -> String
+
+-- | Inverse of <a>formatCodes</a> using lists instead of tuples
+listifyCodes :: String -> [[String]]
+
+-- | Takes two-dimensional list, returns tuple pair (Huffman Map)
+readCodes :: [[String]] -> [([Int], Char)]
+
+-- | Composition of <a>readCodes</a> and <a>listifyCodes</a>
+readCodeString :: String -> [([Int], Char)]
+
+
+-- | This module contains all necessary functions to encode to and decode
+--   from Huffman codes. This module was created for the Utrecht University
+--   of Applied Sciences AI course 'Declarative Programming'
 module Lib
 
 -- | The <a>countValues</a> function counts each unique character in a
@@ -22,6 +60,13 @@ createNodes :: [(Char, Int)] -> [HuffmanTree]
 --   lowest Weight, adds them to the list of HuffmanTrees and repeats until
 --   only one tree is left
 createTree :: [HuffmanTree] -> HuffmanTree
+
+-- | The <a>encodeTree</a> function traverses (Depth First) a HuffmanTree.
+--   It then creates a code for each Node (or Leaf) Each time it goes left,
+--   it adds 0 to the path, every time it goes right it adds 1 to the path.
+--   When it reaches a Node, it returns a tuple containing the character
+--   and the path (the path needs to be reversed to be traversable in
+--   decoding).
 encodeTree :: HuffmanTree -> [(Char, [Int])]
 
 -- | The <a>encodeString</a> function completes Huffman Encoding on text
@@ -38,6 +83,10 @@ decodeList :: [Int] -> Map [Int] Char -> String
 -- | The <a>tupleToMap</a> function is a wrapper for Data.Map.fromList.
 --   This is necessary for encoding the original text.
 tupleToMap :: [(Char, [Int])] -> Map Char [Int]
+
+-- | Returns a Haskell encoded String Composition of <a>encodeString</a>,
+--   <a>tupleToMap</a>, <a>encodeTree</a>, <a>createTree</a>,
+--   <a>createNodes</a> and <a>countValues</a>
 codedString :: String -> [Int]
 instance GHC.Classes.Eq Lib.HuffmanTree
 instance GHC.Show.Show Lib.HuffmanTree
