@@ -51,13 +51,17 @@ reshapeCodes    :: [(Char, [Int])]      -- ^ Huffman Map in tuple form, example:
                 -> [(Char, String)]     -- ^ Huffman Map in Tuple form, example: [(\'c\', \"101\")]
 reshapeCodes xs = [(fst x, concat $ show <$> snd x) | x <- xs]
 
--- FIXME: ++ and [c] are slow, very bad, and not good. Figure out an alternative. Individual strings + concat
+
 -- | Takes a list of Huffman Key-Value pairs, turns into String for printing to file. Uses delimiter1 and delimiter2.
-formatCodes :: [(Char, String)]         -- ^ Huffman Map in tuple form, example: [(\'c\', "101"), (\'d\', "110")]
-            -> String                   -- ^ Stringified Huffman map for printing to file, example: \"c||\@||101\/\/\#\/\/d||\@||110\"
-formatCodes []            = []
-formatCodes [(c, i)]      = [c] ++ delimiter1 ++ i
-formatCodes ((c, i):xs)   = [c] ++ delimiter1 ++ i ++ delimiter2 ++ formatCodes xs
+formatCodes    :: [(Char, String)]         -- ^ Huffman Map in tuple form, example: [(\'c\', "101"), (\'d\', "110")]
+                -> String                   -- ^ Stringified Huffman map for printing to file, example: \"c||\@||101\/\/\#\/\/d||\@||110\"
+formatCodes [] = []
+formatCodes xs = concat $ formatCodes' xs
+        where
+            formatCodes' :: [(Char, String)] -> [String]
+            formatCodes' [(c, i)] = [ c : delimiter1 ++ i]
+            formatCodes' ((c, i):xs) = ( c : delimiter1 ++ i ++ "//#//") : formatCodes' xs
+
 
 -- | Inverse of 'formatCodes' using lists instead of tuples
 listifyCodes    :: String       -- ^ Stringified Huffman map, example: \"c||\@||101\/\/\#\/\/d||\@||110\"
