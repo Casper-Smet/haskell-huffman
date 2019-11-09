@@ -8,21 +8,21 @@ import Control.Monad.Trans          (lift)
 import Control.Monad.Trans.State    (StateT, evalStateT, modify, get)
 import Data.Map                     (Map, empty, fromList, insert)
 
-type DecodeMonad = StateT (Map [Int] Char, DecodeState) IO
+type DecodeMonad = StateT (Map [Binary] Char, DecodeState) IO
 
 data DecodeState = Entering | Decoding deriving (Eq)
 
 
-getDecState :: (Map [Int] Char, DecodeState) -> DecodeState
+getDecState :: (Map [Binary] Char, DecodeState) -> DecodeState
 getDecState (_, s) = s
 
-setDecode :: (Map [Int] Char, DecodeState) -> (Map [Int] Char, DecodeState)
+setDecode :: (Map [Binary] Char, DecodeState) -> (Map [Binary] Char, DecodeState)
 setDecode (m, _) = (m, Decoding) 
 
-addKey ::  ([Int], Char) -> (Map [Int] Char, DecodeState) -> (Map [Int] Char, DecodeState)
+addKey ::  ([Binary], Char) -> (Map [Binary] Char, DecodeState) -> (Map [Binary] Char, DecodeState)
 addKey (xs, c) (m, s) = (insert xs c m, s) 
 
-getMap :: (Map [Int] Char, DecodeState) -> Map [Int] Char
+getMap :: (Map [Binary] Char, DecodeState) -> Map [Binary] Char
 getMap (m, _) = m
 
 encode :: IO ()
@@ -84,11 +84,11 @@ decode = do
                         value <- lift getLine
                         lift $ putStrLn "Enter code"
                         key <- lift getLine
-                        if all (`elem` "01") key && length value == 1
+                        if all (`elem` "IO") key && length value == 1
                             then do
-                                let intKey = keyFromString key
+                                let binKey = keyFromString key
                                 let charValue = head value
-                                modify (addKey (intKey, charValue))
+                                modify (addKey (binKey, charValue))
                                 decode
                         else do
                                 modify setDecode
@@ -98,14 +98,14 @@ decode = do
                         lift $ print $ getMap state
                         lift $ putStrLn "Enter encoded word"
                         word <- lift getLine
-                        if all (`elem` "01") word
+                        if all (`elem` "IO") word
                             then do
                                 let list = keyFromString word
                                 let map = getMap state 
                                 let decodedWord = decodeList list map
                                 lift $ putStrLn decodedWord
                         else do
-                            lift $ putStrLn "Enter only 1s or 0s" 
+                            lift $ putStrLn "Enter only Is or Os" 
                             decode
 
                         
@@ -121,7 +121,7 @@ decodeFile = do
     putStrLn "Relative path to code:"
     codeLocation <- getLine
     stringCode <- readFile codeLocation
-    if all (`elem` "01") stringCode && all (\x -> length x > 0) [stringCode, stringMap]
+    if all (`elem` "IO") stringCode && all (\x -> length x > 0) [stringCode, stringMap]
         then do
             let wordList = keyFromString stringCode
             let characterMap = fromList $ readCodeString stringMap

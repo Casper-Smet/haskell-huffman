@@ -24,6 +24,7 @@ module HFIO
     ) where
 
 import Data.List.Split              (splitOn)
+import Lib                          (Binary(..))
 
 -- ####  #######  
 --  ##  ##     ## 
@@ -39,21 +40,21 @@ delimiter1 = "||@||"
 -- | Second delimiter used for encoding map \"\//#\//\"
 delimiter2 = "//#//"
 
--- | Takes a string containing \'1\' or \'0\'s, returns list of Int. 
+-- | Takes a string containing \'1\' or \'0\'s, returns list of Binary. 
 keyFromString   :: String       -- ^ String, example: "0101"
-                -> [Int]        -- ^ List of Int, example: [0,1,0,1]
+                -> [Binary]        -- ^ List of Binary, example: [0,1,0,1]
 keyFromString key 
-    | all (`elem` "01") key = [read [k] :: Int | k <- key]
+    | all (`elem` "IO") key = [if k == 'I' then I else O | k <- key]
     | otherwise             = error "keyFromString; Bad Huffman key"
 
 -- | Reshapes Huffman Map
-reshapeCodes    :: [(Char, [Int])]      -- ^ Huffman Map in tuple form, example: [(\'c\', [1,0,1])]
-                -> [(Char, String)]     -- ^ Huffman Map in Tuple form, example: [(\'c\', \"101\")]
+reshapeCodes    :: [(Char, [Binary])]       -- ^ Huffman Map in tuple form, example: [(\'c\', [1,0,1])]
+                -> [(Char, String)]         -- ^ Huffman Map in Tuple form, example: [(\'c\', \"101\")]
 reshapeCodes xs = [(fst x, concat $ show <$> snd x) | x <- xs]
 
 
 -- | Takes a list of Huffman Key-Value pairs, turns into String for printing to file. Uses delimiter1 and delimiter2.
-formatCodes    :: [(Char, String)]         -- ^ Huffman Map in tuple form, example: [(\'c\', "101"), (\'d\', "110")]
+formatCodes     :: [(Char, String)]         -- ^ Huffman Map in tuple form, example: [(\'c\', "101"), (\'d\', "110")]
                 -> String                   -- ^ Stringified Huffman map for printing to file, example: \"c||\@||101\/\/\#\/\/d||\@||110\"
 formatCodes [] = []
 formatCodes xs = concat $ formatCodes' xs
@@ -70,14 +71,14 @@ listifyCodes xs = [splitOn delimiter1 x | x <- splitOn delimiter2 xs]
 
 -- | Takes two-dimensional list, returns tuple pair (Huffman Map)
 readCodes   :: [[String]]       -- ^ Two dimensional list containg String-code pairs, example [[\"c\", \"101\"], [\"d\", \"110\"]] 
-            -> [([Int], Char)]  -- ^ Huffman Map in tuple form, example: [([1,0,1], \'c\'), ([1,1,1], \'d\')]
+            -> [([Binary], Char)]  -- ^ Huffman Map in tuple form, example: [([1,0,1], \'c\'), ([1,1,1], \'d\')]
 readCodes xss = [readCode xs | xs <- xss]
 
-readCode :: [String] -> ([Int], Char)
+readCode :: [String] -> ([Binary], Char)
 readCode [c, i] = (keyFromString i, head c)
 readCode _ = error "readCodes; Bad Huffman codes"
 
 -- | Composition of 'readCodes' and 'listifyCodes'
 readCodeString  :: String           -- ^ Stringified Huffman map, example: \"c||\@||101\/\/\#\/\/d||\@||110\"
-                -> [([Int], Char)]  -- ^ Huffman Map in tuple form, example: [([1,0,1], \'c\'), ([1,1,1], \'d\')]
+                -> [([Binary], Char)]  -- ^ Huffman Map in tuple form, example: [([1,0,1], \'c\'), ([1,1,1], \'d\')]
 readCodeString = readCodes . listifyCodes
