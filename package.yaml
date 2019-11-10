@@ -1,5 +1,5 @@
 name:                huffman
-version:             0.1.0.0
+version:             1.0.0.0
 github:              "Casper-Smet/haskell-huffman"
 license:             BSD3
 author:              "Casper Smet"

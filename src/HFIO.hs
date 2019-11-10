@@ -41,7 +41,7 @@ delimiter1 = "||"
 delimiter2 = "#|"
 
 -- | Takes a string containing \'I\' or \'O\'s, returns list of Binary. 
-keyFromString   :: String       -- ^ String, example: "OIOI"
+keyFromString   :: String       -- ^ String, example: \"OIOI\"
                 -> [Binary]        -- ^ List of Binary, example: [O,I,O,I]
 keyFromString key 
     | all (`elem` "IO") key = [if k == 'I' then I else O | k <- key]
@@ -54,7 +54,7 @@ reshapeCodes xs = [(fst x, concat $ show <$> snd x) | x <- xs]
 
 
 -- | Takes a list of Huffman Key-Value pairs, turns into String for printing to file. Uses delimiter1 and delimiter2.
-formatCodes     :: [(Char, String)]         -- ^ Huffman Map in tuple form, example: [(\'c\', "IOI"), (\'d\', "IIO")]
+formatCodes     :: [(Char, String)]         -- ^ Huffman Map in tuple form, example: [(\'c\', \"IOI\"), (\'d\', \"IIO\")]
                 -> String                   -- ^ Stringified Huffman map for printing to file, example: \"c||IOI#|/d||IIO\"
 formatCodes [] = []
 formatCodes xs = concat $ formatCodes' xs
@@ -65,13 +65,13 @@ formatCodes xs = concat $ formatCodes' xs
 
 
 -- | Inverse of 'formatCodes' using lists instead of tuples
-listifyCodes    :: String       -- ^ Stringified Huffman map, example: \"c||IOI#|/d||IIO\"
+listifyCodes    :: String       -- ^ Stringified Huffman map, example: \"c||IOI#|d||IIO\"
                 -> [[String]]   -- ^ Two dimensional list containing String-code pairs, example: [[\"c\", \"IOI\"], [\"d\", \"IIO\"]] 
 listifyCodes xs = [splitOn delimiter1 x | x <- splitOn delimiter2 xs]
 
 -- | Takes two-dimensional list, returns tuple pair (Huffman Map)
 readCodes   :: [[String]]       -- ^ Two dimensional list containg String-code pairs, example [[\"c\", \"IOI\"], [\"d\", \"IIO\"]] 
-            -> [([Binary], Char)]  -- ^ Huffman Map in tuple form, example: [([I,O,I], \'c\'), ([I,I,I], \'d\')]
+            -> [([Binary], Char)]  -- ^ Huffman Map in tuple form, example: [([I,O,I], \'c\'), ([I,I,O], \'d\')]
 readCodes xss = [readCode xs | xs <- xss]
 
 readCode :: [String] -> ([Binary], Char)
@@ -79,6 +79,6 @@ readCode [c, i] = (keyFromString i, head c)
 readCode _ = error "readCodes; Bad Huffman codes"
 
 -- | Composition of 'readCodes' and 'listifyCodes'
-readCodeString  :: String           -- ^ Stringified Huffman map, example: \"c||IOI#|/d||IIO\"
-                -> [([Binary], Char)]  -- ^ Huffman Map in tuple form, example: [([I,O,I], \'c\'), ([I,I,I], \'d\')]
+readCodeString  :: String           -- ^ Stringified Huffman map, example: \"c||IOI#|d||IIO\"
+                -> [([Binary], Char)]  -- ^ Huffman Map in tuple form, example: [([I,O,I], \'c\'), ([I,I,O], \'d\')]
 readCodeString = readCodes . listifyCodes

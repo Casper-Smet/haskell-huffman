@@ -82,8 +82,8 @@ createTree (t1:t2:ts)   = createTree $ sort $ mergeNodes t1 t2 : ts
 -- | The 'encodeTree' function traverses (Depth First) a HuffmanTree. It then creates a code for each Node (or Leaf)
 -- Each time it goes left, it adds O to the path, every time it goes right it adds I to the path. 
 -- When it reaches a Node, it returns a tuple containing the character and the path (the path needs to be reversed to be traversable in decoding).
-encodeTree  :: HuffmanTree      -- ^ Completed HuffmanTree
-            -> [(Char, [Binary])]  -- ^ List of tuples containing character and path (binary code)
+encodeTree  :: HuffmanTree          -- ^ Completed HuffmanTree
+            -> [(Char, [Binary])]   -- ^ List of tuples containing character and path (binary code)
 encodeTree t = encodeTree' t []
     where 
         encodeTree' (Node c _) x = [(c, reverse x)]
@@ -96,19 +96,17 @@ tupleToMap  :: [(Char, [Binary])] -- ^ List of tuples containing character and b
 tupleToMap = fromList
 
 -- | The 'encodeString' function completes Huffman Encoding on text using a Map (see 'encodeTree' and subsequently 'tupleToMap')
-encodeString    :: String           -- ^ Text
-                -> Map Char [Binary]   -- ^ Map (AKA dictionary) where key is a unique character, and value a binary code
-                -> [Binary]            -- ^ Huffman encoded Text
+encodeString    :: String               -- ^ Text
+                -> Map Char [Binary]    -- ^ Map (AKA dictionary) where key is a unique character, and value a binary code
+                -> [Binary]             -- ^ Huffman encoded Text
 encodeString [] _ = []
 encodeString (x:xs) m = m ! x ++ encodeString xs m
 
 -- | The 'decodeList' function decodes a Huffman code using Huffman Codes in the form of a Map. 
--- | Checks if xs is a member of m. 
--- | If it is a member, it grabs that values calls itself again with an empty xs and xss as it is.
--- | If it isn't a member of m, it calls itself where xs = xs and the first value of xss, and xss is the tail of xss
-decodeList  :: [Binary]                -- ^ Binary code
-            -> Map [Binary] Char       -- ^ Map (AKA dictionary) where key is a binary code, and value is a unique character
-            -> String               -- ^ Huffman decoded Text
+-- | Tries to find keys in the inputted list. If it cannot, it errors out.
+decodeList  :: [Binary]                 -- ^ Binary code
+            -> Map [Binary] Char        -- ^ Map (AKA dictionary) where key is a binary code, and value is a unique character
+            -> String                   -- ^ Huffman decoded Text
 decodeList = decodeList' []
     where
         decodeList' [] [] _ = []

@@ -5,7 +5,7 @@
 -- | Please see the README on GitHub at
 --   <a>https://github.com/Casper-Smet/haskell-huffman/blob/master/README.md</a>
 @package huffman
-@version 0.1.0.0
+@version 1.0.0.0
 
 
 -- | This module contains all necessary functions to encode to and decode
@@ -40,10 +40,8 @@ encodeTree :: HuffmanTree -> [(Char, [Binary])]
 encodeString :: String -> Map Char [Binary] -> [Binary]
 
 -- | The <a>decodeList</a> function decodes a Huffman code using Huffman
---   Codes in the form of a Map. | Checks if xs is a member of m. | If it
---   is a member, it grabs that values calls itself again with an empty xs
---   and xss as it is. | If it isn't a member of m, it calls itself where
---   xs = xs and the first value of xss, and xss is the tail of xss
+--   Codes in the form of a Map. | Tries to find keys in the inputted list.
+--   If it cannot, it errors out.
 decodeList :: [Binary] -> Map [Binary] Char -> String
 
 -- | The <a>tupleToMap</a> function is a wrapper for Data.Map.fromList.
