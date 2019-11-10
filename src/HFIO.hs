@@ -10,8 +10,8 @@ This module was created for the Utrecht University of Applied Sciences AI course
 
 There are a couple of references to \'delimiter1\' and \'delimiter2\'. These are defined as follows:
 
-* delimiter1 = "||\@||"
-* delimiter2 = "\/\/#\/\/"
+* delimiter1 = "||"
+* delimiter2 = "#|"
 
 -}
 module HFIO
@@ -35,10 +35,10 @@ import Lib                          (Binary(..))
 -- ####  ####### 
 
 
--- | First delimiter used for encoding map \"||\@||\"
-delimiter1 = "||@||"
--- | Second delimiter used for encoding map \"\//#\//\"
-delimiter2 = "//#//"
+-- | First delimiter used for encoding map \"||\"
+delimiter1 = "||"
+-- | Second delimiter used for encoding map \"#|\"
+delimiter2 = "#|"
 
 -- | Takes a string containing \'I\' or \'O\'s, returns list of Binary. 
 keyFromString   :: String       -- ^ String, example: "OIOI"
@@ -55,17 +55,17 @@ reshapeCodes xs = [(fst x, concat $ show <$> snd x) | x <- xs]
 
 -- | Takes a list of Huffman Key-Value pairs, turns into String for printing to file. Uses delimiter1 and delimiter2.
 formatCodes     :: [(Char, String)]         -- ^ Huffman Map in tuple form, example: [(\'c\', "IOI"), (\'d\', "IIO")]
-                -> String                   -- ^ Stringified Huffman map for printing to file, example: \"c||\@||IOI\/\/\#\/\/d||\@||IIO\"
+                -> String                   -- ^ Stringified Huffman map for printing to file, example: \"c||IOI#|/d||IIO\"
 formatCodes [] = []
 formatCodes xs = concat $ formatCodes' xs
         where
             formatCodes' :: [(Char, String)] -> [String]
             formatCodes' [(c, i)] = [ c : delimiter1 ++ i]
-            formatCodes' ((c, i):xs) = ( c : delimiter1 ++ i ++ "//#//") : formatCodes' xs
+            formatCodes' ((c, i):xs) = ( c : delimiter1 ++ i ++ delimiter2) : formatCodes' xs
 
 
 -- | Inverse of 'formatCodes' using lists instead of tuples
-listifyCodes    :: String       -- ^ Stringified Huffman map, example: \"c||\@||IOI\/\/\#\/\/d||\@||IIO\"
+listifyCodes    :: String       -- ^ Stringified Huffman map, example: \"c||IOI#|/d||IIO\"
                 -> [[String]]   -- ^ Two dimensional list containing String-code pairs, example: [[\"c\", \"IOI\"], [\"d\", \"IIO\"]] 
 listifyCodes xs = [splitOn delimiter1 x | x <- splitOn delimiter2 xs]
 
@@ -79,6 +79,6 @@ readCode [c, i] = (keyFromString i, head c)
 readCode _ = error "readCodes; Bad Huffman codes"
 
 -- | Composition of 'readCodes' and 'listifyCodes'
-readCodeString  :: String           -- ^ Stringified Huffman map, example: \"c||\@||IOI\/\/\#\/\/d||\@||IIO\"
+readCodeString  :: String           -- ^ Stringified Huffman map, example: \"c||IOI#|/d||IIO\"
                 -> [([Binary], Char)]  -- ^ Huffman Map in tuple form, example: [([I,O,I], \'c\'), ([I,I,I], \'d\')]
 readCodeString = readCodes . listifyCodes

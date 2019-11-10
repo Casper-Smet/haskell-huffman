@@ -74,8 +74,8 @@ instance GHC.Classes.Ord Lib.HuffmanTree
 --   These are defined as follows:
 --   
 --   <ul>
---   <li>delimiter1 = "||@||"</li>
---   <li>delimiter2 = "//#//"</li>
+--   <li>delimiter1 = "||"</li>
+--   <li>delimiter2 = "#|"</li>
 --   </ul>
 module HFIO
 
