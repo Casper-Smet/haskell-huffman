@@ -47,10 +47,10 @@ encode = do
 
     -- Step 6: encode input
     let codedInput = encodeString input codeMap
+    print codeMap
+    putStrLn $ filter (\x -> x == 'I' || x == 'O') $ show codedInput
 
-    print codedInput
 
--- TODO: Clean up
 encodeFile :: IO ()
 encodeFile = do
     putStrLn "Location of text file"
@@ -83,9 +83,6 @@ encodeFile = do
         encodeFile
 
 
-
-
--- TODO: Clean up
 decode :: DecodeMonad ()
 decode = do   
                 state <- get  
@@ -119,9 +116,8 @@ decode = do
                             lift $ putStrLn "Enter only Is or Os" 
                             decode
 
-                        
--- TODO: Add check for correct format codemap
--- TODO: Clean up
+
+                            
 decodeFile :: IO ()
 decodeFile = do
     -- Get path to Map
@@ -131,13 +127,14 @@ decodeFile = do
     putStrLn "Relative path to code:"
     codeLocation <- getLine
 
+    -- Check if files exist
     codeExists <- doesFileExist codeLocation
     mapExists <- doesFileExist codeMapLocation
 
     if codeExists && mapExists
         then do
+            -- Read files
             stringMap <- readFile codeMapLocation
-
             stringCode <- readFile codeLocation
             
             if all (`elem` "IO") stringCode && all (\x -> length x > 0) [stringCode, stringMap]

@@ -19,7 +19,9 @@ module Lib
     , decodeList
     , tupleToMap
     , codedString
-    , Binary(..)
+    , mergeNodes
+    , Binary(I, O)
+    , HuffmanTree(Node, Branch)
     ) where
 
 import Data.List (group, sort)
@@ -33,8 +35,14 @@ import Data.Map (Map, fromList, (!), member)
 -- ##     ## ##     ## ##       ##       ##     ## ##     ## ##   ### 
 -- ##     ##  #######  ##       ##       ##     ## ##     ## ##    ## 
 
-data Binary = I | O deriving (Show, Ord, Eq)
-
+-- | Binary datatype, uses I and O
+data Binary 
+            = I                                     -- ^ Binary 1
+            | O                                     -- ^ Binary 0 
+                deriving (Show, Ord, Eq)            
+    
+    
+-- | HuffmanTree datatype, uses Node and Branch and branch constructors. HuffmanTrees are compared by weight.
 data HuffmanTree 
     -- | The Node (alternatively, the Leaf) is a type of HuffmanTree containing a Char and a Weight.
     = Node {character :: Char, weight :: Int} 

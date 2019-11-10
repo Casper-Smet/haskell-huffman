@@ -54,9 +54,32 @@ tupleToMap :: [(Char, [Binary])] -> Map Char [Binary]
 --   <a>tupleToMap</a>, <a>encodeTree</a>, <a>createTree</a>,
 --   <a>createNodes</a> and <a>countValues</a>
 codedString :: String -> [Binary]
+
+-- | The <a>mergeNodes</a> function merges two HuffmanTree's into one
+--   Branch. | The weight of the new Branch being the sum of the weight of
+--   it's predecessors.
+mergeNodes :: HuffmanTree -> HuffmanTree -> HuffmanTree
+
+-- | Binary datatype, uses I and O
 data Binary
+
+-- | Binary 1
 I :: Binary
+
+-- | Binary 0
 O :: Binary
+
+-- | HuffmanTree datatype, uses Node and Branch and branch constructors.
+--   HuffmanTrees are compared by weight.
+data HuffmanTree
+
+-- | The Node (alternatively, the Leaf) is a type of HuffmanTree containing
+--   a Char and a Weight.
+Node :: Char -> Int -> HuffmanTree
+
+-- | The Branch is a type of HuffmanTree containting two other
+--   HuffmanTreess and the sum of the weight of these HuffmanTreess.
+Branch :: HuffmanTree -> HuffmanTree -> Int -> HuffmanTree
 instance GHC.Classes.Eq Lib.HuffmanTree
 instance GHC.Show.Show Lib.HuffmanTree
 instance GHC.Classes.Eq Lib.Binary
