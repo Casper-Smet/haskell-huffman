@@ -26,6 +26,7 @@ dependencies:
 - mtl
 - split
 - directory
+- HUnit
 
 library:
   source-dirs: src
